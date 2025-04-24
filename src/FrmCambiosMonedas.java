@@ -1,11 +1,14 @@
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
@@ -138,7 +141,21 @@ public class FrmCambiosMonedas extends JFrame {
             // Cambiar a la pestaña de estadísticas
             tpCambiosMoneda.setSelectedIndex(1);
 
+            pnlEstadisticas.removeAll();
+            pnlEstadisticas.setLayout(new GridBagLayout());
 
+            int fila = 0;
+            var estadisticas = CambioMonedaServicio.getEstadisticas(moneda, desde, hasta, datos);
+            for (var estadistica : estadisticas.entrySet()) {
+                GridBagConstraints gbc = new GridBagConstraints();
+                gbc.gridx = 0;
+                gbc.gridy = fila;
+                pnlEstadisticas.add(new JLabel(estadistica.getKey()), gbc);
+                gbc.gridx = 1;
+                pnlEstadisticas.add(new JLabel(String.format("%.2f", estadistica.getValue())), gbc);
+                fila++;
+            }
+            pnlEstadisticas.revalidate();
         }
     }
 
