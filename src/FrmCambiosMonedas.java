@@ -23,6 +23,13 @@ import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.time.Day;
+import org.jfree.data.time.TimeSeries;
+import org.jfree.data.time.TimeSeriesCollection;
+
 import datechooser.beans.DateChooserCombo;
 import entidades.CambioMoneda;
 import servicios.CambioMonedaServicio;
@@ -128,6 +135,37 @@ public class FrmCambiosMonedas extends JFrame {
 
             // Cambiar a la pestaña de Grafica
             tpCambiosMoneda.setSelectedIndex(0);
+
+            var datosFiltrados = CambioMonedaServicio.filtrar(moneda, desde, hasta, datos);
+            var cambiosXFecha = CambioMonedaServicio.extraer(datosFiltrados);
+
+            var fechas = cambiosXFecha.getX();
+            var cambios = cambiosXFecha.getY();
+
+            TimeSeries serie = new TimeSeries("Cambio en USD de " + moneda);
+            for (int i = 0; i < fechas.size(); i++) {
+                var fecha = fechas.get(i);
+                serie.addOrUpdate(new Day(fecha.getDayOfMonth(), fecha.getMonthValue(), fecha.getYear()),
+                        cambios.get(i));
+            }
+
+            TimeSeriesCollection datosGrafica=new TimeSeriesCollection();
+            datosGrafica.addSeries(serie);
+
+            JFreeChart graficador=ChartFactory.createTimeSeriesChart(
+                "Gráfica de cambio de "+moneda+" vs Fecha",
+                "Fecha",
+                "Cambio en USD",
+                datosGrafica);
+
+            ChartPanel pnlGraficador=new ChartPanel(graficador);
+            pnlGraficador.setPreferredSize(new Dimension(600,400));
+
+            pnlGrafica.removeAll();
+            pnlGrafica.setLayout(new BorderLayout());
+            pnlGrafica.add(pnlGraficador, BorderLayout.CENTER);
+            pnlGrafica.revalidate();;
+
         }
     }
 

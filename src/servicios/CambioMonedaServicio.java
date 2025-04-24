@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,17 @@ public class CambioMonedaServicio {
                 .filter(dato -> dato.getMoneda().equals(moneda) && !dato.getFecha().isBefore(desde)
                         && !dato.getFecha().isAfter(hasta))
                 .collect(Collectors.toList());
+    }
+
+    public static Par<List<LocalDate>, List<Double>> extraer(List<CambioMoneda> datos) {
+        var datosOrdenados = datos.stream()
+                .sorted(Comparator.comparing(CambioMoneda::getFecha))
+                .collect(Collectors.toList());
+
+        var fechas=datosOrdenados.stream().map(CambioMoneda::getFecha).collect(Collectors.toList());
+        var cambios=datosOrdenados.stream().map(CambioMoneda::getCambio).collect(Collectors.toList());
+
+        return new Par<>(fechas, cambios);
     }
 
     public static double getPromedio(List<Double> datos) {
